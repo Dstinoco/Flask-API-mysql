@@ -1,12 +1,38 @@
 from flask import Flask, jsonify, request
 import mysql.connector
 import pandas as pd
+from flask_jwt_extended import JWTManager
+from model import UsersModel
+from db import db 
 
 
-mydb = mysql.connector.connect(user='root', password='bart1234',
-                              host='localhost',
-                              database='db_carros')
+
+
+
+mydb = mysql.connector.connect(user='root', 
+                               password='bart1234',
+                               host='localhost',
+                               database='db_carros')
 app = Flask(__name__)
+
+
+
+app.config['JWT_SECRET_KEY'] = 'teste-key-tinoco'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:bart1234@localhost/db_carros'
+
+
+db.init_app(app)
+JWTManager(app)
+
+
+
+
+with app.app_context():
+    db.create_all()
+    db.session.commit()
+
+
+
 
 
 @app.route('/carros', methods=['GET'])
@@ -48,7 +74,6 @@ def excluir_carro(id):
     my_cursor.execute(query, (id,))
     mydb.commit()
     return jsonify({'message': f'Carro de ID {id} removido com sucesso.'})
-
 
 @app.route('/carros/<int:id>', methods=['PUT'])
 def atualizar_carro(id):
