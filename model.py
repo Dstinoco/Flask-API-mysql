@@ -9,4 +9,7 @@ class UsersModel(db.Model):
     def __init__(self, email, password):
         self.email = email
         self.password = pbkdf2_sha256.hash(password)
+        
+    def check_password(self, password):
+        return pbkdf2_sha256.verify(password, self.password)    
 
